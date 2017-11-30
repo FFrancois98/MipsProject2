@@ -1,2 +1,2 @@
 # MipsProject2
-Mips Programming Assignment 2
+Computer Organization 1 - Mips Programming Assignment 2
