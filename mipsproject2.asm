@@ -98,3 +98,71 @@ length_error:
 	and $t8, $t8, $zero				#Reset seen valid character flag
 	and $t9, $t9, $zero				#Reset substring counter
 	j skip_loop						#Skip to next substring
+	
+main_error:
+	la $a0, notNum		#Load address of notNum
+	li $v0, 4						#Print notNum
+	syscall
+		
+	add $s1, $s1, $t9				#Move pointer for writing to current string to an empty cell
+	or $s3, $zero, $s1				#Update the head of current string accordingly
+	and $t8, $t8, $zero				#Reset seen valid character flag
+	and $t9, $t9, $zero				#Reset substring counter
+	
+	j skip_loop						#Skip to next substring
+	
+
+skip_loop:
+	addi $s2, $s2, 1				#Go to next character in current string
+	lb $s0, 0($s2)					#Load character into $s0
+	beq $s0, ',', loop				#Check for spaces at the beginning of new substring
+	beq $s0, $zero, print_strings	#Check if at end of input
+	beq $s0, '\n', print_strings	#Check if at end of input
+	bne $s0, ',', skip_loop			#Continue loop if space is seen
+	
+	
+	j loop							#Continue loop
+	
+	
+end:
+	add $t0, $s2, -1				#Check previous character
+	lb $t1, 0($t0)					#Load the character into $t1
+	beq $t1, ',', print_end			#If the last character was a comma then we know this was an invalid string
+	
+	li $v0, 10						#End program
+	syscall
+
+
+print_end:
+	la $a0, notNum		#Load address of notNum
+	li $v0, 4						#Print error message
+	syscall
+	
+	li $v0, 10						#End the program
+	syscall
+	
+subprogram_1:
+	sll $t2, $t2, 4					#Multiply by 16
+	
+	slti $t4, $t3, ':'				#Check if character is a number
+	bne $t4, $zero, digit_subpro_1		#Take care of character being a number case
+	
+	slti $t4, $t3, 'G'				#Check if the character is uppercase
+	bne $t4, $zero, upperCase_subpro_1		#Take care of character being uppercase
+	
+	addi $t4, $t3, -87				#Subtract 87 from lowercase to get hexadecimal value
+	add $t2, $t2, $t4				#Add translated character to running sum
+	
+	jr $ra							#Return to subprogram_2
+	
+
+upperCase_subpro_1:
+	addi $t4, $t3, -55				#Subract 55 from uppercase to get hexadecimal value
+	add $t2, $t2, $t4				#Add translated character to running sum
+	
+	jr $ra							#Return to subprogram_2
+	
+digit_subpro_1:
+	addi $t4, $t3, -48				#Subract 48 from number to get hexadecimal value					
+	add $t2, $t2, $t4				#Add translated character to running sum
+	jr $ra							#Return to subprogram_2
