@@ -64,3 +64,37 @@ is_valid:
 	addi $t9, $t9, 1				#Increment current substring length counter (max 8)
 	
 	j loop							#Back to main loop
+
+	
+subStringProcess:
+	la $a0, ($s3)					#Load beginning of current substring into $a0 as argument
+	beq $t8, $zero, main_error		#If letter has not been seen then string is not valid
+	jal subprogram_2						#Go to subroutine 2
+	
+	addi $s2, $s2, 1				#Go to next character from input
+	and $t8, $t8, $zero				#Reset seen valid character flag
+	and $t9, $t9, $zero				#Reset substring counter
+	or $s3, $s1, $zero				#Move head pointer of userSubString to next substring beginning
+	
+	j loop							#Go back to main loop
+	
+	
+print_strings:
+	la $a0, ($s3)					#Load beginning of current substring into $a0 as argument
+	lb $t1, 0($s3)					#Load first character in current substring
+	beq $t1, '\n', end				#Check if at end of input string
+	beq $t1, $zero, end				#Check if at end of input string
+	jal subprogram_2						#Go to subroutine 2
+	j end
+
+
+length_error:
+	la $a0, tooLargeString		#Load address of notNum
+	li $v0, 4						#Print notNum
+	syscall
+	
+	add $s1, $s1, $t9				#Move pointer for writing to current string to an empty cell
+	or $s3, $zero, $s1				#Update the head of current string accordingly
+	and $t8, $t8, $zero				#Reset seen valid character flag
+	and $t9, $t9, $zero				#Reset substring counter
+	j skip_loop						#Skip to next substring
