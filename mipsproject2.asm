@@ -41,3 +41,26 @@ loop:
 	
 	j loop							#Continue loop
 	
+
+space_loop:
+	addi $s2, $s2, 1				#Go to next character in current string
+	lb $s0, 0($s2)					#Load character into $s0
+	beq $s0, ' ', space_loop		#Skip space if at the beginning or at the end
+	beq $s0, '\t', space_loop
+	beq $s0, $zero, print_strings	#Check if at end of input
+	beq $s0, '\n', print_strings	#Check if at end of input
+	beq $s0, ',', subStringProcess		#Process chars at the end of the current substring
+	
+	j is_valid						#Check if this is a valid char after reading spaces
+	
+
+is_valid:
+	bne $t8, $zero, main_error		#If previous valid char has been read then NaN
+	sb $s0, 0($s1)					#First valid char encountered so save in userSubString
+	li $t8, 1						#Set seen valid character flag
+	or $s3, $zero, $s1				#Update current string head pointer
+	addi $s1, $s1, 1				#Go to next empty place in userSubString
+	addi $s2, $s2, 1				#Go to next character from input
+	addi $t9, $t9, 1				#Increment current substring length counter (max 8)
+	
+	j loop							#Back to main loop
